@@ -25,7 +25,34 @@ def get_listings_from_search_results(html_file):
         ('Loft in Mission District', 210, '1944564'),  # example
     ]
     """
-    pass
+    base_path = os.path.abspath(os.path.dirname(__file__))
+    full_path = os.path.join(base_path, html_file)
+    with open(full_path, 'r' ) as f:
+        content = f.read()
+        soup = BeautifulSoup(content, 'html.parser')
+    
+    
+        listing_titles = soup.find_all('div', class_="t1jojoys dir dir-ltr")
+        listing_prices = soup.find_all('span', class_="_tyxjp1")
+        listing_ids = soup.find_all('div', itemtype='http://schema.org/ListItem')
+        list_ids = []
+
+        for id in listing_ids:
+            url = id.find('meta', itemprop = 'url')["content"]
+            url = url.split('?')[0]
+            id = url.split('/')[-1]
+            list_ids.append(id)
+
+        list_title = []
+        for t in listing_titles:
+            list_title.append(t.text.strip())
+        list_price = []
+        for p in listing_prices:
+            list_price.append(p.text.strip()[1:])
+        final_list = []
+        for loop in range(len(list_title)):
+            final_list.append((list_title[loop], int(list_price[loop]), list_ids[loop]))
+        return(final_list)
 
 
 def get_listing_information(listing_id):
@@ -52,7 +79,35 @@ def get_listing_information(listing_id):
         number of bedrooms
     )
     """
-    pass
+    source_dir = os.path.dirname(__file__)
+    full_path = os.path.join(source_dir, f"html_files/listing_{listing_id}")
+    f = open(full_path, 'r')
+    content = f.read()
+    f.close()
+    soup = BeautifulSoup(content, 'html.parser')
+    policy_number = soup.find_all('li', class_= 'f19phm7j dir dir-ltr')[0].text
+
+    if "pending" in policy_number.lower():
+        policy_number = "Pending"
+    elif "exempt" in policy_number.lower() or "not needed" in policy_number.lower():
+        policy_number = "Exempt"
+    else:
+        policy_number = policy_number.lstrip("Policy number: ")
+
+    place_type = soup.find_all('h2', class_='_14i3z6h')[0].text
+    if "private" in place_type.lower():
+        place_type = "Private Room"
+    elif "shared" in place_type.lower():
+        place_type = "Shared Room"
+    else:
+        place_type = "Entire Room"
+    num_bedrooms = soup.find_all('li', class_="l7n4lsf dir dir-ltr")[1]
+    num2 = num_bedrooms.find_all('span')[2].text
+    if "studio" in num2.lower():
+        num2 = 1
+    else:
+        num2 = num2.split(" ")[0]
+    return(policy_number,place_type, int(num2))
 
 
 def get_detailed_listing_database(html_file):
@@ -147,11 +202,14 @@ class TestCases(unittest.TestCase):
         # check that the variable you saved after calling the function is a list
         self.assertEqual(type(listings), list)
         # check that each item in the list is a tuple
+        for i in listings:
+            self.assertEqual(type(i), tuple)
 
         # check that the first title, cost, and listing id tuple is correct (open the search results html and find it)
-
+        self.assertEqual(listings[0],("Loft in Mission DIstrict",210,"1944564"))
         # check that the last title is correct (open the search results html and find it)
-        pass
+        self.assertEqual(listings[-1][0],("Guest suite in Mission District"))
+        
 
     def test_get_listing_information(self):
         html_list = ["1623609",
@@ -174,12 +232,12 @@ class TestCases(unittest.TestCase):
             # check that the third element in the tuple is an int
             self.assertEqual(type(listing_information[2]), int)
         # check that the first listing in the html_list has policy number 'STR-0001541'
-
+        self.assertEqual(listing_informations[0][0],'STR-0001541')
         # check that the last listing in the html_list is a "Private Room"
+        self.assertEqual(listing_informations[-1][1],'Private Room')
 
         # check that the third listing has one bedroom
-
-        pass
+        self.assertEqual(listing_informations[2][2],1)
 
     def test_get_detailed_listing_database(self):
         # call get_detailed_listing_database on "html_files/mission_district_search_results.html"
