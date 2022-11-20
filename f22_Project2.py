@@ -81,7 +81,7 @@ def get_listing_information(listing_id):
     )
     """
     source_dir = os.path.dirname(__file__)
-    full_path = os.path.join(source_dir, f"html_files/listing_{listing_id}")
+    full_path = os.path.join(source_dir, f"html_files/listing_{listing_id}.html")
     f = open(full_path, 'r')
     content = f.read()
     f.close()
