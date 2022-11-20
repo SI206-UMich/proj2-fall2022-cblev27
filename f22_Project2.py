@@ -183,7 +183,12 @@ def check_policy_numbers(data):
     ]
 
     """
-    pass
+    no_match = []
+    for num in data:
+        if num[3] != "Pending" and num[3] != "Exempt":
+            if (re.match(r"STR-000[0-9]{4}", num[3]) == None) and (re.match(r"20[0-9]{2}-00[0-9]{4}STR", num[3]) == None):
+                no_match.append(num[2])
+    return no_match
 
 
 def extra_credit(listing_id):
@@ -302,11 +307,12 @@ class TestCases(unittest.TestCase):
         # check that the return value is a list
         self.assertEqual(type(invalid_listings), list)
         # check that there is exactly one element in the string
-
+        self.assertEqual(len(invalid_listings), 1)
         # check that the element in the list is a string
-
+        self.assertEqual(type(invalid_listings[0]), type('string'))
         # check that the first element in the list is '16204265'
-        pass
+        self.assertEqual(type(invalid_listings[0]), '16204265')
+        
 
 
 if __name__ == '__main__':
