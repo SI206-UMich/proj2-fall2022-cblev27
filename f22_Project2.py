@@ -158,7 +158,7 @@ def write_csv(data, filename):
     sorted_list = sorted(data, key = lambda t: t[1])
     with open(filename, 'w') as out:
         csv_out = csv.writer(out)
-        csv_out.writerow(['Listing Title', 'Cost', 'Listinf ID', 'Policy Number','Place Type', 'NUmber of Bedrooms'])
+        csv_out.writerow(['Listing Title', 'Cost', 'Listing ID', 'Policy Number','Place Type', 'NUmber of Bedrooms'])
         for row in sorted_list:
             csv_out.writerow(row)
 
